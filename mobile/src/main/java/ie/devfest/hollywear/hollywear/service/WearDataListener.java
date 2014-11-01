@@ -7,12 +7,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -21,7 +17,6 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import ie.devfest.hollywear.hollywear.R;
 import ie.devfest.hollywear.hollywear.api.AengusService;
@@ -77,7 +72,19 @@ public class WearDataListener extends WearableListenerService {
 
             @Override
             public void failure(RetrofitError error) {
+                NotificationManagerCompat notificationManager =
+                        NotificationManagerCompat.from(getBaseContext());
 
+                NotificationCompat.Builder notificationBuilder =
+                        new NotificationCompat.Builder(getBaseContext())
+                                .setSmallIcon(R.drawable.ic_launcher)
+                                .setContentTitle(query)
+                                .setWhen(System.currentTimeMillis())
+                                .setVibrate(new long[]{0, 100, 1000})
+                                .setPriority(NotificationCompat.PRIORITY_MAX)
+                                .setContentText("I don't know");
+
+                notificationManager.notify(1, notificationBuilder.build());
             }
         });
     }

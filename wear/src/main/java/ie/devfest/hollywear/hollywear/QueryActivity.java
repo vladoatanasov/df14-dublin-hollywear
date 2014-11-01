@@ -7,23 +7,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.support.wearable.activity.ConfirmationActivity;
-import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import timber.log.Timber;
@@ -63,6 +57,8 @@ public class QueryActivity extends Activity implements GoogleApiClient.Connectio
     public void onConnected(Bundle connectionHint) {
         Timber.d("Connected to Google Api Service");
         displaySpeechRecognizer();
+//        processQuery("List movies starring Pierce Brosnan");
+//        processQuery("Who played Flash Gordon");
     }
 
     @Override
@@ -107,42 +103,45 @@ public class QueryActivity extends Activity implements GoogleApiClient.Connectio
                     RecognizerIntent.EXTRA_RESULTS);
             String spokenText = results.get(0);
 
-
-            if(mGoogleApiClient.isConnected()) {
-                new AsyncTask<String, Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground(String... params) {
-                        MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                mGoogleApiClient, getNodes().get(0), HOLLY_WEAR_QUERY, params[0].getBytes()).await();
-
-                        if (!result.getStatus().isSuccess()) {
-                            Timber.e("ERROR: failed to send Message: %s", result.getStatus());
-                        }
-
-
-                        // Show Confirmation Activity
-                        Intent confirmationIntent = new Intent(QueryActivity.this, ConfirmationActivity.class);
-                        confirmationIntent.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION);
-                        confirmationIntent.putExtra(ConfirmationActivity.EXTRA_MESSAGE, "Query sent!");
-                        startActivityForResult(confirmationIntent, CONFIRMATION_REQUEST_CODE);
-
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProgressBar.setVisibility(View.GONE);
-                            }
-                        });
-
-                        return null;
-                    }
-                }.execute(spokenText);
-            }
+            processQuery(spokenText);
 
         } else {
             finish();
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void processQuery(String spokenText) {
+        if(mGoogleApiClient.isConnected()) {
+            new AsyncTask<String, Void, Void>() {
+
+                @Override
+                protected Void doInBackground(String... params) {
+                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                            mGoogleApiClient, getNodes().get(0), HOLLY_WEAR_QUERY, params[0].getBytes()).await();
+
+                    if (!result.getStatus().isSuccess()) {
+                        Timber.e("ERROR: failed to send Message: %s", result.getStatus());
+                    }
+
+
+                    // Show Confirmation Activity
+                    Intent confirmationIntent = new Intent(QueryActivity.this, ConfirmationActivity.class);
+                    confirmationIntent.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION);
+                    confirmationIntent.putExtra(ConfirmationActivity.EXTRA_MESSAGE, "Query sent!");
+                    startActivityForResult(confirmationIntent, CONFIRMATION_REQUEST_CODE);
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mProgressBar.setVisibility(View.GONE);
+                        }
+                    });
+
+                    return null;
+                }
+            }.execute(spokenText);
+        }
     }
 
     @Override

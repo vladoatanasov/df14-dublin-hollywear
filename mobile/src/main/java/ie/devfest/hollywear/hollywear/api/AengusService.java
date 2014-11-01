@@ -1,8 +1,6 @@
 package ie.devfest.hollywear.hollywear.api;
 
 import ie.devfest.hollywear.hollywear.api.model.AengusQuery;
-import com.google.gson.JsonObject;
-
 import ie.devfest.hollywear.hollywear.api.model.AengusResponse;
 import retrofit.Callback;
 import retrofit.http.Body;
